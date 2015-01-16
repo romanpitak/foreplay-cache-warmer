@@ -2,22 +2,8 @@ doctype html
 html
     head
         title Cache warmer
-        style.
-            iframe {
-                width: 100%
-            }
-
-            table tbody tr {
-                background-color: palegreen;
-            }
-
-            table tbody tr.loading {
-                background-color: lightsalmon;
-            }
-
-            table tbody tr:hover {
-                background-color: #ffff00;
-            }
+        style
+            include cache-warmer.css
 body
     button(id='asdf') /sitemap.xml
     ol(id='out')
@@ -32,23 +18,4 @@ body
     iframe(class='loader')
     script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js')
     script
-        :coffee
-            urls = []
-            jQuery ->
-                jQuery('iframe').load (event) ->
-                    element = jQuery(event.target)
-                    url = urls.shift();
-                    startTime = Date.now()
-                    out = jQuery 'table tbody'
-                    out.append jQuery '<tr id="' + startTime + '" class="loading"><td>' + url + '</td><td id="time"></td></li>'
-                    if 'undefined' != typeof element.data 'start'
-                        tr = jQuery('tr#' + element.data('start'), out)
-                        jQuery('#time', tr).text (startTime - element.data('start')) / 1000
-                        tr.removeClass 'loading'
-                    element.attr 'src', urls.shift()
-                    element.data 'start', startTime
-                jQuery('#asdf').click ->
-                    jQuery.get '/sitemap.xml', (data) ->
-                        jQuery('urlset url loc', data).each (i, e) -> urls.push jQuery(e).html()
-                        jQuery('iframe').each (i, e) -> jQuery(e).load()
-                    false
+        include:coffee cache-warmer.coffee

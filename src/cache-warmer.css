@@ -1,0 +1,16 @@
+
+iframe {
+    width: 100%
+}
+
+table tbody tr {
+    background-color: palegreen;
+}
+
+table tbody tr.loading {
+    background-color: lightsalmon;
+}
+
+table tbody tr:hover {
+    background-color: #ffff00;
+}
