@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 
-binDir="$(dirname $0)"
+rootDir="$(dirname $0)/.."
+sassFile="${rootDir}/src/cache-warmer.sass"
+cssFile="${rootDir}/src/cache-warmer.css"
 
-jade --pretty "${binDir}/../src"
+sass --unix-newlines --sourcemap=none "${sassFile}" "${cssFile}"
 
-mv "${binDir}/../src/cache-warmer.html" "${binDir}/../foreplay-cache-warmer.html"
+jade --pretty "${rootDir}/src"
+
+if test -f "${cssFile}"; then
+    rm "${cssFile}"
+fi
+
+mv "${rootDir}/src/cache-warmer.html" "${rootDir}/foreplay-cache-warmer.html"

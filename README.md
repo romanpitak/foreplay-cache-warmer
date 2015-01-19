@@ -12,10 +12,10 @@ Universal **one-file cache warmer**. Runs in the browser of your choice (JavaScr
 
 ## Advantages
 
-- one-file container
-- one-button interface
-- full page loading (image cache warm-up)
-- platform independent (runs in browser) 
+- **one-file** container
+- **one-button** interface
+- **full page loading** (image cache warm-up)
+- platform independent (runs in browser)
 
 ## Function
 
@@ -23,4 +23,4 @@ The script downloads the `/sitemap.xml` file from your server and loads all the 
 
 ## About
 
-Written in [jade](http://jade-lang.com/) and [CoffeeScript](http://coffeescript.org/).
+Written in [jade](http://jade-lang.com/), [CoffeeScript](http://coffeescript.org/) and [Sass](http://sass-lang.com/). 
