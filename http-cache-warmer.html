@@ -12,12 +12,22 @@ table tbody tr.loading {
 table tbody tr:hover {
   background-color: #ffff00; }
 
+.hidden {
+  display: none; }
+
     </style>
   </head>
 </html>
 <body>
-  <button id="asdf">/sitemap.xml</button>
-  <table>
+  <form id="parameters" method="GET">
+    <label for="sitemaps">Sitemap</label>
+    <input id="sitemaps" name="sitemaps" type="text" value="/sitemap.xml">
+    <label for="concurrency">Concurrency</label>
+    <input id="concurrency" name="concurrency" type="text" size="2" value="2">
+    <input id="start" name="start" type="hidden" value="0">
+    <button>Start</button>
+  </form>
+  <table class="hidden">
     <caption>Results</caption>
     <thead>
       <tr>
@@ -27,8 +37,6 @@ table tbody tr:hover {
     </thead>
     <tbody></tbody>
   </table>
-  <iframe class="loader"></iframe>
-  <iframe class="loader"></iframe>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <script>(function() {
   var urls;
@@ -36,9 +44,14 @@ table tbody tr:hover {
   urls = [];
 
   jQuery(function() {
-    jQuery('iframe').load(function(event) {
+    var createIframe, i, iframeOnLoad, paramId, paramValue, queryParts, sitemap, _i, _j, _k, _len, _len1, _ref, _ref1, _ref2, _ref3, _results;
+    jQuery('form#parameters button').click(function() {
+      return jQuery('form#parameters #start').val(1);
+    });
+    iframeOnLoad = function(event) {
       var element, out, startTime, tr, url;
       element = jQuery(event.target);
+      element.removeClass('free');
       url = urls.shift();
       startTime = Date.now();
       out = jQuery('table tbody');
@@ -50,18 +63,42 @@ table tbody tr:hover {
       }
       element.attr('src', urls.shift());
       return element.data('start', startTime);
-    });
-    return jQuery('#asdf').click(function() {
-      jQuery.get('/sitemap.xml', function(data) {
-        jQuery('urlset url loc', data).each(function(i, e) {
-          return urls.push(jQuery(e).html());
-        });
-        return jQuery('iframe').each(function(i, e) {
-          return jQuery(e).load();
-        });
-      });
-      return false;
-    });
+    };
+    createIframe = function() {
+      var iframe;
+      iframe = jQuery('<iframe>');
+      jQuery('body').append(iframe);
+      iframe.addClass('loader free');
+      return iframe.load(iframeOnLoad);
+    };
+    _ref = window.location.search.substring(1).split('&');
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      queryParts = _ref[_i];
+      _ref1 = queryParts.split('='), paramId = _ref1[0], paramValue = _ref1[1];
+      if ('' !== paramId) {
+        jQuery('form#parameters #' + paramId).val(decodeURIComponent(paramValue));
+      }
+    }
+    if ('1' === jQuery('form#parameters #start').val()) {
+      for (i = _j = 1, _ref2 = jQuery('form#parameters #concurrency').val(); 1 <= _ref2 ? _j <= _ref2 : _j >= _ref2; i = 1 <= _ref2 ? ++_j : --_j) {
+        createIframe();
+      }
+      jQuery('table').removeClass('hidden');
+      _ref3 = decodeURIComponent(jQuery('form#parameters #sitemaps').val()).split(' ');
+      _results = [];
+      for (_k = 0, _len1 = _ref3.length; _k < _len1; _k++) {
+        sitemap = _ref3[_k];
+        _results.push(jQuery.get(sitemap, function(data) {
+          jQuery('urlset url loc', data).each(function(i, e) {
+            return urls.push(jQuery(e).html().replace(/^.*\/\/[^\/]+/, ''));
+          });
+          return jQuery('iframe.free').each(function(i, e) {
+            return jQuery(e).load();
+          });
+        }));
+      }
+      return _results;
+    }
   });
 
 }).call(this);
