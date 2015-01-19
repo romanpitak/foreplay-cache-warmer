@@ -34,7 +34,7 @@ server {
 }
 ```
 
-The http-cache-warmer will be available on http://localhost:54321/http-cache-warmer.html
+The http-cache-warmer will be available on [http://localhost:54321/http-cache-warmer.html](http://localhost:54321/http-cache-warmer.html)
 
 ## About
 
