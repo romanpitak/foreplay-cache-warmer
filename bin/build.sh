@@ -12,4 +12,4 @@ if test -f "${cssFile}"; then
     rm "${cssFile}"
 fi
 
-mv "${rootDir}/src/cache-warmer.html" "${rootDir}/foreplay-cache-warmer.html"
+mv "${rootDir}/src/cache-warmer.html" "${rootDir}/http-cache-warmer.html"
