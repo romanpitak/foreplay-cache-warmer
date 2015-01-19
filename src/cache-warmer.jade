@@ -5,16 +5,20 @@ html
         style
             include cache-warmer.css
 body
-    button(id='asdf') /sitemap.xml
-    table
+    form#parameters(method='GET')
+        label(for='sitemaps') Sitemap
+        input#sitemaps(name='sitemaps', type='text', value='/sitemap.xml')
+        label(for='concurrency') Concurrency
+        input#concurrency(name='concurrency', type='text', size='2', value='2')
+        input#start(name='start', type='hidden', value='0')
+        button() Start
+    table.hidden
         caption Results
         thead
             tr
                 th url
                 th time
         tbody
-    iframe(class='loader')
-    iframe(class='loader')
     script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js')
     script
         include:coffee cache-warmer.coffee
