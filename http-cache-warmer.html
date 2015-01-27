@@ -39,65 +39,86 @@ table tbody tr:hover {
   </table>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <script>(function() {
-  var urls;
+  var createLoaderIframes, formSubmitBind, iframeOnLoad, loadSitemaps, setFormFieldsFromGet, urls;
 
-  urls = [];
+  iframeOnLoad = function(event) {
+    var element, out, startTime, tr, url;
+    element = jQuery(event.target);
+    element.removeClass('free');
+    url = urls.shift();
+    startTime = Date.now();
+    out = jQuery('table tbody');
+    out.append(jQuery('<tr id="' + startTime + '" class="loading"><td>' + url + '</td><td id="time"></td></li>'));
+    if ('undefined' !== typeof element.data('start')) {
+      tr = jQuery('tr#' + element.data('start'), out);
+      jQuery('#time', tr).text((startTime - element.data('start')) / 1000);
+      tr.removeClass('loading');
+    }
+    element.attr('src', urls.shift());
+    return element.data('start', startTime);
+  };
 
-  jQuery(function() {
-    var createIframe, i, iframeOnLoad, paramId, paramValue, queryParts, sitemap, _i, _j, _k, _len, _len1, _ref, _ref1, _ref2, _ref3, _results;
-    jQuery('form#parameters button').click(function() {
-      return jQuery('form#parameters #start').val(1);
-    });
-    iframeOnLoad = function(event) {
-      var element, out, startTime, tr, url;
-      element = jQuery(event.target);
-      element.removeClass('free');
-      url = urls.shift();
-      startTime = Date.now();
-      out = jQuery('table tbody');
-      out.append(jQuery('<tr id="' + startTime + '" class="loading"><td>' + url + '</td><td id="time"></td></li>'));
-      if ('undefined' !== typeof element.data('start')) {
-        tr = jQuery('tr#' + element.data('start'), out);
-        jQuery('#time', tr).text((startTime - element.data('start')) / 1000);
-        tr.removeClass('loading');
-      }
-      element.attr('src', urls.shift());
-      return element.data('start', startTime);
-    };
-    createIframe = function() {
-      var iframe;
+  createLoaderIframes = function() {
+    var i, iframe, _i, _ref, _results;
+    _results = [];
+    for (i = _i = 1, _ref = jQuery('form#parameters #concurrency').val(); 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
       iframe = jQuery('<iframe>');
       jQuery('body').append(iframe);
       iframe.addClass('loader free');
-      return iframe.load(iframeOnLoad);
-    };
+      _results.push(iframe.load(iframeOnLoad));
+    }
+    return _results;
+  };
+
+  formSubmitBind = function() {
+    return jQuery('form#parameters button').click(function() {
+      return jQuery('form#parameters #start').val(1);
+    });
+  };
+
+  setFormFieldsFromGet = function() {
+    var paramId, paramValue, queryParts, _i, _len, _ref, _ref1, _results;
     _ref = window.location.search.substring(1).split('&');
+    _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       queryParts = _ref[_i];
       _ref1 = queryParts.split('='), paramId = _ref1[0], paramValue = _ref1[1];
       if ('' !== paramId) {
-        jQuery('form#parameters #' + paramId).val(decodeURIComponent(paramValue));
+        _results.push(jQuery('form#parameters #' + paramId).val(decodeURIComponent(paramValue)));
+      } else {
+        _results.push(void 0);
       }
     }
+    return _results;
+  };
+
+  loadSitemaps = function() {
+    var sitemap, _i, _len, _ref, _results;
+    _ref = decodeURIComponent(jQuery('form#parameters #sitemaps').val()).split(' ');
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      sitemap = _ref[_i];
+      _results.push(jQuery.get(sitemap, function(data) {
+        jQuery('urlset url loc', data).each(function(i, e) {
+          return urls.push(jQuery(e).html().replace(/^.*\/\/[^\/]+/, ''));
+        });
+        return jQuery('iframe.free').each(function(i, e) {
+          return jQuery(e).load();
+        });
+      }));
+    }
+    return _results;
+  };
+
+  urls = [];
+
+  jQuery(function() {
+    formSubmitBind();
+    setFormFieldsFromGet();
     if ('1' === jQuery('form#parameters #start').val()) {
-      for (i = _j = 1, _ref2 = jQuery('form#parameters #concurrency').val(); 1 <= _ref2 ? _j <= _ref2 : _j >= _ref2; i = 1 <= _ref2 ? ++_j : --_j) {
-        createIframe();
-      }
+      createLoaderIframes();
       jQuery('table').removeClass('hidden');
-      _ref3 = decodeURIComponent(jQuery('form#parameters #sitemaps').val()).split(' ');
-      _results = [];
-      for (_k = 0, _len1 = _ref3.length; _k < _len1; _k++) {
-        sitemap = _ref3[_k];
-        _results.push(jQuery.get(sitemap, function(data) {
-          jQuery('urlset url loc', data).each(function(i, e) {
-            return urls.push(jQuery(e).html().replace(/^.*\/\/[^\/]+/, ''));
-          });
-          return jQuery('iframe.free').each(function(i, e) {
-            return jQuery(e).load();
-          });
-        }));
-      }
-      return _results;
+      return loadSitemaps();
     }
   });
 
